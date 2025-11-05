@@ -338,10 +338,10 @@ function App() {
 						borderRadius: '5px',
 					}}
 				>
-					<h4>Отладка:</h4>
+					<h4>Сводка:</h4>
 					<p>Всего представителей: {state.representatives.length}</p>
 					<p>
-						Представители с прогрессом:{' '}
+						Представители с планом подготовки:{' '}
 						{
 							state.representatives.filter(
 								rep =>

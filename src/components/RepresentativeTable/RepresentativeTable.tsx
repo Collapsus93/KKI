@@ -165,7 +165,7 @@ export const RepresentativeTable: React.FC<Props> = ({
             <tr>
               <th className="col-number" rowSpan={2}>#</th>
               <th className="col-name" rowSpan={2}>👤 Исполнитель</th>
-              <th className="col-progress section-divider-right" rowSpan={2}>📚 Прогресс</th>
+              <th className="col-progress section-divider-right" rowSpan={2}>📚 Курсы</th>
               
               <th className="section-header credit-cards-section section-divider-both" colSpan={3}>💳 КК</th>
               <th className="section-header sim-cards-section section-divider-both" colSpan={3}>📱 Мобайл</th>
