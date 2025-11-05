@@ -53,9 +53,11 @@ export interface SalesReport {
   salesCount?: number;
   successRate?: number;
   courseProgress?: number;
+  trainingCompletionDate?: string;
+  profileUrl?: string;
 }
 
-export type ProductType = 'creditCards' | 'simCards' | 'investments' | 'dataUpdate' | 'successRate' | 'courseProgress';
+export type ProductType = 'creditCards' | 'simCards' | 'investments' | 'dataUpdate' | 'successRate' | 'courseProgress' | 'completionData';
 
 export interface AppState {
   representatives: Representative[];

@@ -56,6 +56,7 @@ export const FileUpload: React.FC<Props> = ({ onUpload, existingRepresentativeNa
           <option value="dataUpdate">🔄 Обновление данных</option>
           <option value="successRate">📊 Успешность встреч</option>
           <option value="courseProgress">📚 Прогресс по курсам</option>
+          <option value="completionData">🎓 Завершение подготовки</option>
         </select>
         <input
           type="file"

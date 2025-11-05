@@ -35,9 +35,10 @@ export class FileParser {
 						console.log('📋 Доступные столбцы:', Object.keys(jsonData[0] as any))
 					}
 
-					jsonData.forEach((row: any) => {
-						// Поиск имени представителя с нормализацией
+					jsonData.forEach((row: any, index: number) => {
+						// Поиск имени представителя с нормализацией - ОБНОВЛЕННЫЙ ПОИСК
 						const rawRepresentativeName = 
+							row['Представитель'] || // ← ОСНОВНОЙ ВАРИАНТ ДЛЯ ВАШЕГО ФАЙЛА
 							row['ФИ'] ||
 							row['ФИО'] ||
 							row['Единица по группировке'] ||
@@ -46,9 +47,12 @@ export class FileParser {
 
 						const representativeName = normalizeName(rawRepresentativeName)
 
-						if (!representativeName) return
+						if (!representativeName) {
+							console.log(`❌ Пропуск строки ${index}: не найдено имя представителя`, row)
+							return
+						}
 
-						console.log(`👤 Нормализованное имя: "${rawRepresentativeName}" → "${representativeName}"`)
+						console.log(`👤 Строка ${index}: "${rawRepresentativeName}" → "${representativeName}"`)
 
 						// Проверка нового представителя (с нормализованными именами)
 						if (!existingNames.has(representativeName.toLowerCase())) {
@@ -66,25 +70,19 @@ export class FileParser {
 								utilization: this.parsePercentage(row['% утиль / продаж'] || row['Utilization'] || 0),
 							})
 						} else if (productType === 'simCards') {
-							// ДЛЯ SIM-КАРТ - УМНОЖАЕМ ПРОЦЕНТЫ НА 100
 							const tariffPaymentPercent = this.parsePercentage(
 								row['% оплат тарифа/офферы'] || 
 								row['Tariff Payment %'] || 
 								row['Процент оплаты'] || 
 								0
-							) * 100; // ← УМНОЖАЕМ НА 100
+							) * 100;
 
 							reports.push({
 								representativeName,
 								productType,
 								offers: this.parseNumber(row['Офферов'] || row['Offers'] || 0),
 								tariffPayments: this.parseNumber(row['Оплата тарифа'] || row['Tariff Payments'] || 0),
-								tariffPaymentPercent: Math.min(100, Math.max(0, tariffPaymentPercent)), // ← ОГРАНИЧИВАЕМ 0-100%
-							})
-							console.log(`📱 SIM-карты для ${representativeName}:`, {
-								offers: reports[reports.length - 1].offers,
-								tariffPayments: reports[reports.length - 1].tariffPayments,
-								tariffPaymentPercent: reports[reports.length - 1].tariffPaymentPercent
+								tariffPaymentPercent: Math.min(100, Math.max(0, tariffPaymentPercent)),
 							})
 						} else if (productType === 'investments') {
 							reports.push({
@@ -109,17 +107,11 @@ export class FileParser {
 								})
 							}
 						} else if (productType === 'courseProgress') {
-							// ПРОГРЕСС ПО КУРСАМ
 							const progressValue = 
-								row['Прогресс'] ||           // Основной вариант
-								row['Progress'] ||           // Английский вариант  
-								row['Процент от максимума'] || // Альтернативный вариант из вашего файла
+								row['Прогресс'] ||           
+								row['Progress'] ||             
+								row['Процент от максимума'] || 
 								0
-
-							console.log(`📚 Прогресс для ${representativeName}:`, {
-								сыроеЗначение: progressValue,
-								тип: typeof progressValue
-							})
 
 							const courseProgress = this.parsePercentage(progressValue) * 100
 							
@@ -141,10 +133,50 @@ export class FileParser {
 									salesCount: dataUpdateValue,
 								})
 							}
+						} else if (productType === 'completionData') {
+							// НОВЫЙ ТИП: ДАННЫЕ О ЗАВЕРШЕНИИ ПОДГОТОВКИ
+							const completionDate = row['Завершение периода адаптации'];
+							
+							// Извлекаем и очищаем ссылку на AGS
+							const rawProfileUrl = row['Ссылка на AGS'];
+							let cleanProfileUrl = '';
+							
+							if (rawProfileUrl) {
+								// Извлекаем URL из HTML ссылки
+								const urlMatch = rawProfileUrl.match(/href="([^"]*)"/);
+								if (urlMatch && urlMatch[1]) {
+									cleanProfileUrl = urlMatch[1];
+								} else {
+									// Если это уже чистый URL, используем как есть
+									cleanProfileUrl = rawProfileUrl;
+								}
+							}
+
+							// ПРЕОБРАЗОВАНИЕ ДАТЫ ИЗ EXCEL ФОРМАТА
+							let formattedDate = completionDate;
+							if (completionDate && typeof completionDate === 'number') {
+								// Excel даты хранятся как числа (дни с 1900-01-01)
+								formattedDate = this.excelDateToJSDate(completionDate);
+							}
+							
+							console.log(`🎓 Данные завершения для ${representativeName}:`, {
+								rawDate: completionDate,
+								formattedDate: formattedDate,
+								rawUrl: rawProfileUrl,
+								cleanUrl: cleanProfileUrl
+							});
+							
+							reports.push({
+								representativeName,
+								productType,
+								trainingCompletionDate: formattedDate || undefined,
+								profileUrl: cleanProfileUrl || undefined
+							});
 						}
 					})
 
 					console.log(`✅ Обработка завершена: ${reports.length} отчетов, ${newRepresentatives.length} новых представителей`)
+					console.log(`📊 Примеры отчетов:`, reports.slice(0, 3)) // Покажем первые 3 отчета для дебага
 					resolve({ reports, newRepresentatives })
 
 				} catch (error) {
@@ -178,5 +210,19 @@ export class FileParser {
 			return parsed > 1 ? parsed : parsed * 100
 		}
 		return 0
+	}
+
+	// Конвертация Excel даты в JS Date string
+	private static excelDateToJSDate(serial: number): string {
+		// Excel даты начинаются с 1900-01-01
+		const utc_days = Math.floor(serial - 25569);
+		const utc_value = utc_days * 86400;                                        
+		const date_info = new Date(utc_value * 1000);
+		
+		const year = date_info.getUTCFullYear();
+		const month = String(date_info.getUTCMonth() + 1).padStart(2, '0');
+		const day = String(date_info.getUTCDate()).padStart(2, '0');
+		
+		return `${year}-${month}-${day}`;
 	}
 }

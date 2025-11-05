@@ -126,17 +126,33 @@ export const RepresentativeTable: React.FC<Props> = ({
     return notes.substring(0, 50) + '...';
   };
 
+  // ПОНЯТНАЯ ЛОГИКА СОРТИРОВКИ
   const sortedRepresentatives = useMemo(() => {
+    // Если сортировка отключена - возвращаем исходный порядок
     if (sortBy.direction === null) return representatives;
 
+    // Создаем копию массива для сортировки
     return [...representatives].sort((a, b) => {
-      const dateA = a.trainingCompletionDate ? new Date(a.trainingCompletionDate).getTime() : 0;
-      const dateB = b.trainingCompletionDate ? new Date(b.trainingCompletionDate).getTime() : 0;
+      const hasDateA = !!a.trainingCompletionDate;
+      const hasDateB = !!b.trainingCompletionDate;
+
+      // СЛУЧАЙ 1: У одного из представителей нет даты
+      if (!hasDateA && hasDateB) return 1; // A без даты идет ПОСЛЕ B с датой
+      if (hasDateA && !hasDateB) return -1; // A с даты идет ПЕРЕД B без даты
+      
+      // СЛУЧАЙ 2: У обоих нет дат - сохраняем исходный порядок
+      if (!hasDateA && !hasDateB) return 0;
+
+      // СЛУЧАЙ 3: У обоих есть даты - сортируем по дате
+      const dateA = new Date(a.trainingCompletionDate!).getTime();
+      const dateB = new Date(b.trainingCompletionDate!).getTime();
 
       if (sortBy.direction === 'desc') {
-        return dateB - dateA; // Новые сверху
+        // Новые даты сверху
+        return dateB - dateA;
       } else {
-        return dateA - dateB; // Старые сверху
+        // Старые даты сверху  
+        return dateA - dateB;
       }
     });
   }, [representatives, sortBy]);
@@ -306,7 +322,7 @@ export const RepresentativeTable: React.FC<Props> = ({
                   <td 
                     className="col-notes section-divider-both"
                     onClick={() => handleEditNotes(representative)}
-                    title="Кликните для редактирования заметок"
+                    title="Кликните для редактирования заметки"
                     style={{ cursor: 'pointer' }}
                   >
                     {getNotesPreview(representative.notes)}

@@ -252,6 +252,32 @@ function App() {
 						`🔄 Обновлены данные для ${representative.fullName}: ${report.salesCount}`
 					)
 					processed++
+				} else if (
+					productType === 'completionData' &&
+					(report.trainingCompletionDate !== undefined || report.profileUrl !== undefined)
+				) {
+					// НОВАЯ ОБРАБОТКА: ДАННЫЕ О ЗАВЕРШЕНИИ ПОДГОТОВКИ
+					const repIndex = updatedRepresentatives.findIndex(
+						rep => rep.id === representative.id
+					)
+					if (repIndex !== -1) {
+						const updatedRep = {
+							...updatedRepresentatives[repIndex],
+							...(report.trainingCompletionDate && { 
+								trainingCompletionDate: report.trainingCompletionDate 
+							}),
+							...(report.profileUrl && { 
+								profileUrl: report.profileUrl 
+							})
+						};
+						
+						updatedRepresentatives[repIndex] = updatedRep;
+						console.log(
+							`🎓 Обновлены данные завершения для ${representative.fullName}:`,
+							`дата: ${report.trainingCompletionDate}, профиль: ${report.profileUrl}`
+						);
+					}
+					processed++
 				} else {
 					console.log(
 						`❌ Не удалось обработать отчет для ${representative.fullName}:`,
