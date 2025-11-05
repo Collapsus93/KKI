@@ -1,38 +1,725 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 .App {
+  width: 100vw;
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding: 12px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden;
+}
+
+.container {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Заголовок приложения */
+h1 {
+  text-align: center;
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+  font-size: 1.8rem;
+  font-weight: 600;
+  padding: 0 5px;
+}
+
+/* Секция контролов */
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.add-representative,
+.upload-section {
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.add-representative h3,
+.upload-section h3 {
+  margin: 0 0 12px 0;
+  color: #34495e;
+  font-size: 1rem;
+  font-weight: 600;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 6px;
+}
+
+/* Формы */
+.form-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.form-row .input-group {
+  flex: 1;
+  min-width: 120px;
+}
+
+.form-row .input-group label {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 10px;
+  color: #7f8c8d;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+input[type="text"],
+input[type="date"],
+select,
+input[type="file"] {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #e1e5e9;
+  border-radius: 4px;
+  font-size: 12px;
+  background: white;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+button {
+  padding: 6px 14px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  background: #2980b9;
+  transform: translateY(-1px);
+}
+
+.delete-btn {
+  background: #e74c3c;
+  padding: 6px 12px;
+  font-size: 11px;
+}
+
+.delete-btn:hover {
+  background: #c0392b;
+}
+
+.cancel-btn {
+  background: #95a5a6;
+  margin-left: 6px;
+}
+
+.cancel-btn:hover {
+  background: #7f8c8d;
+}
+
+/* Карточка метрик */
+.metrics-card {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: 1px solid #e1e5e9;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.metrics-card h3 {
+  margin: 0 0 12px 0;
+  color: #2c3e50;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 8px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.metric {
+  background: #f8f9fa;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  padding: 12px 8px;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.metric-value {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 3px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.metric-label {
+  font-size: 11px;
+  color: #7f8c8d;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+.metric-subtitle {
+  font-size: 9px;
+  color: #999;
+  margin-top: 2px;
+}
+
+/* Компактная таблица */
+.compact-table {
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.compact-table table {
+  min-width: auto;
+  font-size: 11px;
+}
+
+/* Базовые стили столбцов */
+.col-number {
+  min-width: 35px;
+  max-width: 35px;
+  text-align: center;
+  font-weight: 600;
+  color: #7f8c8d;
+}
+
+.col-name {
+  min-width: 180px;
+  max-width: 180px;
+  text-align: left;
+  font-weight: 600;
+  color: #2c3e50;
+  position: relative;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.col-progress {
+  min-width: 55px;
+  max-width: 55px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.col-success-rate {
+  min-width: 60px;
+  max-width: 60px;
+  font-weight: 700;
+  text-align: center;
+  font-size: 10px; 
+}
+
+.col-training-date {
+  min-width: 90px;
+  max-width: 90px;
+  color: #7f8c8d;
+  font-style: italic;
+  cursor: pointer;
+  text-decoration: underline;
+  text-align: center;
+  font-size: 10px;
+}
+
+.col-notes {
+  min-width: 180px;
+  max-width: 180px;
+  text-align: left;
+  padding: 6px 8px;
+  cursor: pointer;
+  color: #7f8c8d;
+  font-style: italic;
+  white-space: normal;
+  word-wrap: break-word;
+  line-height: 1.3;
+  font-size: 11px;
+}
+
+.col-actions {
+  min-width:120px;
+  max-width: 120px;
+  color: #7f8c8d;
+  font-style: italic;
+  cursor: pointer;
+  text-decoration: underline;
+  text-align: center;
+  font-size: 10px;
+}
+
+/* Стили для секций продаж */
+.credit-cards-section,
+.sim-cards-section,
+.investments-section {
+  min-width: 40px;
+  max-width: 40px;
+  text-align: center;
+  padding: 6px 2px;
+}
+
+/* Процентные столбцы немного шире */
+.credit-cards-section.section-divider-right,
+.sim-cards-section.section-divider-right,
+.investments-section.section-divider-right {
+  min-width: 45px;
+  max-width: 45px;
+}
+
+/* Заголовки секций */
+.section-header {
+  font-weight: 700;
+  padding: 8px 4px;
+}
+
+/* Подзаголовки */
+.sub-header {
+  background: #34495e !important;
+  font-size: 9px !important;
+  font-weight: 500 !important;
+  padding: 6px 2px !important;
+  text-align: center;
+}
+
+/* Беседы */
+.conversation-cell {
+  min-width: 35px;
+  max-width: 35px;
+  text-align: center;
+  padding: 6px 2px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #7f8c8d;
+  transition: all 0.2s ease;
+  border-radius: 3px;
+}
+
+.conversation-cell:hover {
+  background: #3498db !important;
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.conversation-cell.has-link {
+  background: #27ae60 !important;
+  color: white;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Визуальные разделители */
+.section-divider-left {
+  border-left: 2px solid #bdc3c7 !important;
+}
+
+.section-divider-right {
+  border-right: 2px solid #bdc3c7 !important;
+}
+
+.section-divider-both {
+  border-left: 2px solid #bdc3c7 !important;
+  border-right: 2px solid #bdc3c7 !important;
+}
+
+/* Имя представителя */
+.name-cell {
+  cursor: pointer;
+  padding-right: 25px;
+  display: block;
+  line-height: 1.4;
+  white-space: normal;
+  word-wrap: break-word;
+  font-size: 11px;
+}
+
+.name-cell:hover {
+  color: #3498db;
+}
+
+.name-cell.has-link:hover {
+  text-decoration: underline;
+}
+
+.link-icon {
+  font-size: 8px;
+  opacity: 0.7;
+  margin-left: 4px;
+}
+
+.edit-url-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 3px;
+  font-size: 9px;
+  opacity: 0.5;
+}
+
+.edit-url-btn:hover {
+  opacity: 1;
+  background: #f8f9fa;
+}
+
+/* Кнопки в колонке действий */
+.template-btn {
+  background: #9b59b6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 60px;
+  transition: all 0.2s ease;
+  margin-bottom: 4px;
+}
+
+.template-btn:hover {
+  background: #8e44ad;
+  transform: translateY(-1px);
+}
+
+.delete-btn {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 70px;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+/* Состояние пустой таблицы */
+.empty-state {
+  text-align: center;
+  color: #7f8c8d;
+  padding: 60px 20px;
+  font-size: 16px;
+  font-style: italic;
+}
+
+/* Общие стили таблицы */
+.table-container {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e1e5e9;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: auto;
+  margin-bottom: 15px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  min-width: 1200px;
+}
+
+.compact-table th {
+  background: #2c3e50;
+  color: white;
+  font-weight: 600;
+  padding: 8px 4px;
+  text-align: center;
+  border: none;
+  white-space: normal;
+  word-wrap: break-word;
+  line-height: 1.2;
+}
+
+.compact-table td {
+  padding: 6px 2px;
+  text-align: center;
+  border-bottom: 1px solid #f1f2f6;
+  border-right: 1px solid #f1f2f6;
+  background: white;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.compact-table tr:nth-child(even) td {
+  background: #f8f9fa;
+}
+
+.compact-table tr:hover td {
+  background: #e8f4fd;
+}
+
+/* Цветовые акценты для секций */
+.credit-cards-section {
+  background: rgba(39, 174, 96, 0.05);
+}
+
+.sim-cards-section {
+  background: rgba(230, 126, 34, 0.05);
+}
+
+.investments-section {
+  background: rgba(155, 89, 182, 0.05);
+}
+
+.conversations-section {
+  background: rgba(52, 152, 219, 0.05);
+}
+
+/* Загрузка файлов */
+.upload-controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.upload-controls select,
+.upload-controls input[type="file"] {
+  flex: 1;
+  min-width: 120px;
+  margin: 0;
+}
+
+.loading {
+  margin-top: 6px;
+  color: #3498db;
+  font-style: italic;
+  font-size: 11px;
+  text-align: center;
+  padding: 5px;
+  background: #ebf5fb;
+  border-radius: 3px;
+}
+
+/* Модальные окна */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 15px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  min-width: 300px;
+  max-width: 90vw;
+}
+
+.modal-content h4 {
+  margin: 0 0 12px 0;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+/* Стили для модального окна шаблона */
+.template-content {
+  margin: 15px 0;
+}
+
+.template-text {
+  background: #f8f9fa;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 15px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.template-text pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.template-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.copy-btn {
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+  background: #219a52;
+}
+
+.copy-btn.copied {
+  background: #3498db;
+}
+
+/* Стили для текстовой области в модальном окне заметок */
+.edit-notes textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 10px;
+  border: 1px solid #e1e5e9;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.edit-notes textarea:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+  .App {
+    padding: 8px;
   }
-  to {
-    transform: rotate(360deg);
+  
+  .controls {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
+  
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+  }
+  
+  .compact-table {
+    max-width: 1100px;
+  }
+  
+  .compact-table table {
+    font-size: 10px;
+  }
+  
+  .col-name {
+    min-width: 160px;
+    max-width: 160px;
+  }
+}
+
+@media (max-width: 768px) {
+  .App {
+    padding: 6px;
+  }
+  
+  .add-representative,
+  .upload-section {
+    padding: 12px;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-row {
+    flex-direction: column;
+  }
+  
+  .form-row .input-group {
+    min-width: 100%;
+  }
+  
+  table {
+    font-size: 10px;
+    min-width: 1100px;
+  }
+  
+  th, td {
+    padding: 8px 4px;
+  }
+  
+  .compact-table {
+    max-width: 100%;
+  }
+  
+  .compact-table table {
+    min-width: 1200px;
+    font-size: 10px;
+  }
+}
+
+/* Улучшаем скролл */
+.table-container::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Плавные переходы */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease;
 }

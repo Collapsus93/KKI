@@ -1,0 +1,1 @@
+export { RepresentativeTable } from './RepresentativeTable';
