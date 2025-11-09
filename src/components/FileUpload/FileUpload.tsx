@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
-import { ProductType, SalesReport } from '../../types';
+import { ProductType, SalesReport, TimePeriod } from '../../types';
 import { FileParser, ProcessedReport } from '../../utils/fileParser';
 
 interface Props {
-  onUpload: (reports: SalesReport[], productType: ProductType, newRepresentatives: string[]) => void;
+  onUpload: (reports: SalesReport[], productType: ProductType, newRepresentatives: string[], period: TimePeriod) => void;
   existingRepresentativeNames: string[];
+  period: TimePeriod;
 }
 
-export const FileUpload: React.FC<Props> = ({ onUpload, existingRepresentativeNames }) => {
+export const FileUpload: React.FC<Props> = ({ onUpload, existingRepresentativeNames, period }) => {
   const [productType, setProductType] = useState<ProductType>('creditCards');
   const [isLoading, setIsLoading] = useState(false);
+
+  const getPeriodLabel = () => {
+    return period === 'currentMonth' ? 'текущий месяц' : 'последние 3 месяца';
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -26,12 +31,12 @@ export const FileUpload: React.FC<Props> = ({ onUpload, existingRepresentativeNa
         );
         
         if (shouldAddNew) {
-          onUpload(reports, productType, newRepresentatives);
+          onUpload(reports, productType, newRepresentatives, period);
         } else {
-          onUpload(reports, productType, []);
+          onUpload(reports, productType, [], period);
         }
       } else {
-        onUpload(reports, productType, []);
+        onUpload(reports, productType, [], period);
       }
     } catch (error: any) {
       alert('Ошибка при обработке файла: ' + error.message);
@@ -43,7 +48,7 @@ export const FileUpload: React.FC<Props> = ({ onUpload, existingRepresentativeNa
 
   return (
     <div className="upload-section">
-      <h3>📤 Загрузить отчет по продажам</h3>
+      <h3>📤 Загрузить отчет по продажам ({getPeriodLabel()})</h3>
       <div className="upload-controls">
         <select 
           value={productType} 

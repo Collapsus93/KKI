@@ -59,9 +59,15 @@ export interface SalesReport {
 
 export type ProductType = 'creditCards' | 'simCards' | 'investments' | 'dataUpdate' | 'successRate' | 'courseProgress' | 'completionData';
 
+
+export type TimePeriod = 'currentMonth' | 'last3Months';
+
 export interface AppState {
   representatives: Representative[];
-  salesData: Record<string, SalesData>;
+  salesData: {
+    currentMonth: Record<string, SalesData>;
+    last3Months: Record<string, SalesData>;
+  };
 }
 
 // Функция для парсинга ФИО

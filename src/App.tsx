@@ -1,29 +1,55 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import './App.css'
 import { AddRepresentativeForm } from './components/AddRepresentativeForm'
 import { FileUpload } from './components/FileUpload'
 import { MetricsCard } from './components/MetricsCard'
 import { RepresentativeTable } from './components/RepresentativeTable'
+import { Tabs } from './components/Tabs/Tabs'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import {
 	ProductType,
 	Representative,
 	SalesData,
 	SalesReport,
+	TimePeriod,
 	normalizeName,
 	parseFullName,
 } from './types'
 
 function App() {
 	const [state, setState] = useLocalStorage()
+	const [activeTab, setActiveTab] = useState<TimePeriod>('currentMonth')
 
 	const existingRepresentativeNames = useMemo(
 		() => state.representatives.map(rep => rep.fullName),
 		[state.representatives]
 	)
 
+	// Получаем данные для активной вкладки
+	const currentSalesData = state.salesData[activeTab]
+
 	const addRepresentative = (representative: Representative) => {
-		const newSalesData: SalesData = {
+		const newSalesDataCurrent: SalesData = {
+			representativeId: representative.id,
+			creditCards: {
+				offers: 0,
+				issuance: 0,
+				utilization: 0,
+			},
+			simCards: {
+				offers: 0,
+				tariffPayments: 0,
+				tariffPaymentPercent: 0,
+			},
+			investments: {
+				offers: 0,
+				accountOpening: 0,
+				utilization: 0,
+			},
+			dataUpdate: 0,
+		}
+
+		const newSalesDataLast3: SalesData = {
 			representativeId: representative.id,
 			creditCards: {
 				offers: 0,
@@ -46,8 +72,14 @@ function App() {
 		setState({
 			representatives: [...state.representatives, representative],
 			salesData: {
-				...state.salesData,
-				[representative.id]: newSalesData,
+				currentMonth: {
+					...state.salesData.currentMonth,
+					[representative.id]: newSalesDataCurrent,
+				},
+				last3Months: {
+					...state.salesData.last3Months,
+					[representative.id]: newSalesDataLast3,
+				},
 			},
 		})
 	}
@@ -68,23 +100,29 @@ function App() {
 			return
 		}
 
-		const { [id]: removed, ...newSalesData } = state.salesData
+		const { [id]: removedCurrent, ...newSalesDataCurrent } = state.salesData.currentMonth
+		const { [id]: removedLast3, ...newSalesDataLast3 } = state.salesData.last3Months
 
 		setState({
 			representatives: state.representatives.filter(rep => rep.id !== id),
-			salesData: newSalesData,
+			salesData: {
+				currentMonth: newSalesDataCurrent,
+				last3Months: newSalesDataLast3,
+			},
 		})
 	}
 
 	const handleFileUpload = (
 		reports: SalesReport[],
 		productType: ProductType,
-		newRepresentatives: string[]
+		newRepresentatives: string[],
+		period: TimePeriod
 	) => {
 		console.log('📥 Начало обработки загрузки:', {
 			reportsCount: reports.length,
 			productType,
 			newRepresentativesCount: newRepresentatives.length,
+			period,
 		})
 
 		let processed = 0
@@ -107,9 +145,30 @@ function App() {
 		})
 
 		// Создаем обновленное состояние
-		const newRepresentativesData: Record<string, SalesData> = {}
+		const newRepresentativesDataCurrent: Record<string, SalesData> = {}
+		const newRepresentativesDataLast3: Record<string, SalesData> = {}
+		
 		representativesToAdd.forEach(rep => {
-			newRepresentativesData[rep.id] = {
+			newRepresentativesDataCurrent[rep.id] = {
+				representativeId: rep.id,
+				creditCards: {
+					offers: 0,
+					issuance: 0,
+					utilization: 0,
+				},
+				simCards: {
+					offers: 0,
+					tariffPayments: 0,
+					tariffPaymentPercent: 0,
+				},
+				investments: {
+					offers: 0,
+					accountOpening: 0,
+					utilization: 0,
+				},
+				dataUpdate: 0,
+			}
+			newRepresentativesDataLast3[rep.id] = {
 				representativeId: rep.id,
 				creditCards: {
 					offers: 0,
@@ -134,7 +193,17 @@ function App() {
 			...state.representatives,
 			...representativesToAdd,
 		]
-		const updatedSalesData = { ...state.salesData, ...newRepresentativesData }
+
+		// Обновляем данные только для указанного периода
+		const updatedSalesDataForPeriod = { 
+			...state.salesData[period], 
+			...newRepresentativesDataCurrent 
+		}
+
+		const updatedSalesData = {
+			...state.salesData,
+			[period]: updatedSalesDataForPeriod
+		}
 
 		// Обрабатываем отчеты
 		reports.forEach((report, index) => {
@@ -171,13 +240,16 @@ function App() {
 					report.issuance !== undefined &&
 					report.utilization !== undefined
 				) {
-					updatedSalesData[representative.id].creditCards = {
-						offers: report.offers,
-						issuance: report.issuance,
-						utilization: report.utilization,
+					updatedSalesData[period][representative.id] = {
+						...updatedSalesData[period][representative.id],
+						creditCards: {
+							offers: report.offers,
+							issuance: report.issuance,
+							utilization: report.utilization,
+						}
 					}
 					console.log(
-						`💳 Обновлены кредитные карты для ${representative.fullName}`
+						`💳 Обновлены кредитные карты для ${representative.fullName} (${period})`
 					)
 					processed++
 				} else if (
@@ -186,12 +258,15 @@ function App() {
 					report.tariffPayments !== undefined &&
 					report.tariffPaymentPercent !== undefined
 				) {
-					updatedSalesData[representative.id].simCards = {
-						offers: report.offers,
-						tariffPayments: report.tariffPayments,
-						tariffPaymentPercent: report.tariffPaymentPercent,
+					updatedSalesData[period][representative.id] = {
+						...updatedSalesData[period][representative.id],
+						simCards: {
+							offers: report.offers,
+							tariffPayments: report.tariffPayments,
+							tariffPaymentPercent: report.tariffPaymentPercent,
+						}
 					}
-					console.log(`📱 Обновлены SIM-карты для ${representative.fullName}`)
+					console.log(`📱 Обновлены SIM-карты для ${representative.fullName} (${period})`)
 					processed++
 				} else if (
 					productType === 'investments' &&
@@ -199,12 +274,15 @@ function App() {
 					report.accountOpening !== undefined &&
 					report.utilization !== undefined
 				) {
-					updatedSalesData[representative.id].investments = {
-						offers: report.offers,
-						accountOpening: report.accountOpening,
-						utilization: report.utilization,
+					updatedSalesData[period][representative.id] = {
+						...updatedSalesData[period][representative.id],
+						investments: {
+							offers: report.offers,
+							accountOpening: report.accountOpening,
+							utilization: report.utilization,
+						}
 					}
-					console.log(`📈 Обновлены инвестиции для ${representative.fullName}`)
+					console.log(`📈 Обновлены инвестиции для ${representative.fullName} (${period})`)
 					processed++
 				} else if (
 					productType === 'successRate' &&
@@ -244,12 +322,12 @@ function App() {
 					productType === 'dataUpdate' &&
 					report.salesCount !== undefined
 				) {
-					updatedSalesData[representative.id] = {
-						...updatedSalesData[representative.id],
+					updatedSalesData[period][representative.id] = {
+						...updatedSalesData[period][representative.id],
 						dataUpdate: report.salesCount,
 					}
 					console.log(
-						`🔄 Обновлены данные для ${representative.fullName}: ${report.salesCount}`
+						`🔄 Обновлены данные для ${representative.fullName}: ${report.salesCount} (${period})`
 					)
 					processed++
 				} else if (
@@ -308,7 +386,7 @@ function App() {
 		})
 
 		// Показываем результаты
-		let message = `Обработано: ${processed} записей`
+		let message = `Обработано: ${processed} записей (${period === 'currentMonth' ? 'текущий месяц' : 'последние 3 месяца'})`
 		if (newRepresentatives.length > 0) {
 			message += `\nДобавлено новых представителей: ${newRepresentatives.length}`
 		}
@@ -335,22 +413,26 @@ function App() {
 			<div className='container'>
 				<h1>📊 Кабинет контроля исполнителей</h1>
 
+				{/* Добавляем вкладки */}
+				<Tabs activeTab={activeTab} onTabChange={setActiveTab} />
+
 				<div className='controls'>
 					<AddRepresentativeForm onAdd={addRepresentative} />
 					<FileUpload
 						onUpload={handleFileUpload}
 						existingRepresentativeNames={existingRepresentativeNames}
+						period={activeTab}
 					/>
 				</div>
 
 				<MetricsCard
-					salesData={state.salesData}
+					salesData={currentSalesData}
 					representatives={state.representatives}
 				/>
 
 				<RepresentativeTable
 					representatives={state.representatives}
-					salesData={state.salesData}
+					salesData={currentSalesData}
 					onRemove={removeRepresentative}
 					onUpdate={updateRepresentative}
 				/>
@@ -364,8 +446,14 @@ function App() {
 						borderRadius: '5px',
 					}}
 				>
-					<h4>Сводка:</h4>
+					<h4>Сводка ({activeTab === 'currentMonth' ? 'Текущий месяц' : 'Последние 3 месяца'}):</h4>
 					<p>Всего представителей: {state.representatives.length}</p>
+					<p>
+						Представители с данными о продажах:{' '}
+						{
+							Object.keys(currentSalesData).length
+						}
+					</p>
 					<p>
 						Представители с планом подготовки:{' '}
 						{
